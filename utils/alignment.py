@@ -4,36 +4,34 @@ import PIL.Image
 import scipy
 import scipy.ndimage
 import dlib
+import operator
 
+class NumberOfFacesError(Exception):
+    """Raised when the number of faces detected is not what was expected"""
+    def __init__(self, expected_msg, actual_number):
+        super().__init__(f"Expected {expected_msg} faces but found {actual_number}")
+        self.expected_msg = expected_msg
+        self.actual_number = actual_number
 
-def get_landmark(filepath, predictor):
+def get_landmarks(img : PIL.Image, predictor):
     """get landmark with dlib
     :return: np.array shape=(68, 2)
     """
     detector = dlib.get_frontal_face_detector()
 
-    img = dlib.load_rgb_image(filepath)
     dets = detector(img, 1)
 
     for k, d in enumerate(dets):
         shape = predictor(img, d)
 
-    t = list(shape.parts())
-    a = []
-    for tt in t:
-        a.append([tt.x, tt.y])
-    lm = np.array(a)
-    return lm
+        t = list(shape.parts())
+        a = []
+        for tt in t:
+            a.append([tt.x, tt.y])
+        lm = np.array(a)
+        yield lm
 
-
-def align_face(filepath, predictor):
-    """
-    :param filepath: str
-    :return: PIL Image
-    """
-
-    lm = get_landmark(filepath, predictor)
-
+def get_quad(lm):
     lm_chin = lm[0: 17]  # left-right
     lm_eyebrow_left = lm[17: 22]  # left-right
     lm_eyebrow_right = lm[22: 27]  # left-right
@@ -63,8 +61,28 @@ def align_face(filepath, predictor):
     quad = np.stack([c - x - y, c - x + y, c + x + y, c + x - y])
     qsize = np.hypot(*x) * 2
 
+    return (qsize, quad)
+
+
+def align_face(filepath, predictor, img : PIL.Image = None):
+    """
+    :param filepath: str
+    :return: PIL Image
+    """
+
+    if img is None:
+        img = PIL.Image.open(filepath)
+
+    npimg = np.array(img)
+    quads = [ get_quad(lm) for lm in get_landmarks(npimg, predictor) ]
+
+    if(len(quads) < 1):
+        raise NumberOfFacesError("atleast 1", len(quads))
+    largestQuad = max(quads, key=operator.itemgetter(0))
+    (qsize, quad) = largestQuad
+    
+
     # read image
-    img = PIL.Image.open(filepath)
 
     output_size = 256
     transform_size = 256
@@ -107,7 +125,7 @@ def align_face(filepath, predictor):
         quad += pad[:2]
 
     # Transform.
-    img = img.transform((transform_size, transform_size), PIL.Image.QUAD, (quad + 0.5).flatten(), PIL.Image.BILINEAR)
+    img = img.transform((transform_size, transform_size), PIL.Image.QUAD, (quad + 0.5).flatten(), PIL.Image.BICUBIC)
     if output_size < transform_size:
         img = img.resize((output_size, output_size), PIL.Image.ANTIALIAS)
 
