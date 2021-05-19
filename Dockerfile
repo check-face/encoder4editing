@@ -103,9 +103,11 @@ RUN pip install \
     urllib3==1.25.9 \
     werkzeug==1.0.1 \
     zipp==3.1.0 \
-    pyaml
+    pyaml==5.4.1
 
-RUN pip install dlib
-
+RUN pip install \
+    dlib==19.21.1 \
+    Flask==1.1.2 \
+    pillow==8.1.2
 
 WORKDIR /app
