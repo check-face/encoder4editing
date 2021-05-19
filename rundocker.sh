@@ -47,4 +47,4 @@ else
 fi
 
 
-# docker run --shm-size=2g --gpus all --restart unless-stopped -v `pwd`:/app -w /app -p "8083:8080" --name encoderapi -d --network checkfaceapi e4e python server/server_inference.py
+# docker run --shm-size=2g --gpus all --restart unless-stopped -v `pwd`:/app -w /app -p "8083:8080" --name encoderapi -d --network checkfaceapi e4e python scripts/server_inference.py

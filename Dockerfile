@@ -26,7 +26,7 @@ RUN apt-get install -y --fix-missing \
     zip \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
-RUN pip install dlib
+RUN pip install dlib==19.21.1
 
 RUN conda update -n base conda
 
@@ -103,7 +103,7 @@ RUN pip install \
     urllib3==1.25.9 \
     werkzeug==1.0.1 \
     zipp==3.1.0 \
-    pyaml==5.4.1
+    pyyaml==5.4.1
 
 RUN pip install \
     dlib==19.21.1 \

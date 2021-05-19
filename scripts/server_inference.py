@@ -103,7 +103,7 @@ def get_batch(batchsize):
     yield job_queue.get(True) # will block until it gets a job
     for i in range(batchsize-1):
         if not job_queue.empty():
-            yield q.get_nowait()
+            yield job_queue.get_nowait()
 
 def worker(ckpt, batch_size):
     net, opts = setup_model(ckpt, device)
