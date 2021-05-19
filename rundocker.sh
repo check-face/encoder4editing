@@ -26,7 +26,8 @@ set -e
 
 rest=$@
 
-IMAGE="${IMAGE:-e4e4:latest}"
+IMAGE="${IMAGE:-e4e:latest}"
+PORT=8083
 
 if [[ ! -v GPUDEVICE ]]; then
     GPUS="all"
@@ -37,9 +38,13 @@ fi
 CONTAINER_ID=$(docker inspect --format="{{.Id}}" ${IMAGE} 2> /dev/null)
 if [[ "${CONTAINER_ID}" ]]; then
     docker run --shm-size=2g --gpus $GPUS -it --rm -v `pwd`:/app \
+        -p $PORT:8080 \
         --workdir=/app $IMAGE $@
         # --user $(id -u):$(id -g) \
 else
     echo "Unknown container image: ${IMAGE}"
     exit 1
 fi
+
+
+# docker run --shm-size=2g --gpus all --restart unless-stopped -v `pwd`:/app -w /app -p "8083:8080" --name encoderapi -d --network checkfaceapi e4e python server/server_inference.py

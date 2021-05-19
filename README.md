@@ -1,3 +1,24 @@
+# Use encoder4editing as an api
+
+There is a Dockerfile to install dependencies. It is intended to mount the repository in the docker container at runtime
+
+`scripts/server_inference.py` runs a flask server which can encode images using encoder4editing, with optional face alignment.
+
+To use the server, post an http request to `/api/encodeimage/` with files having `usrimg` set to an image file and
+data is a json object with property `tryalign` set to true or false.
+
+```python
+(files, data) = ({ 'usrimg': imgFile }, { 'tryalign': tryAlign })
+resp = requests.post("http://encoderapi:8080/api/encodeimage/", files=files, data=data)
+
+if resp.ok:
+  respData = resp.json()
+  latentArray = respData['dlatent']
+  didAlign = respData['did_align']
+```
+
+## Original Readme:
+
 # Designing an Encoder for StyleGAN Image Manipulation
   <a href="https://arxiv.org/abs/2102.02766"><img src="https://img.shields.io/badge/arXiv-2008.00951-b31b1b.svg"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
