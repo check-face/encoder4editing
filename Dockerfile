@@ -28,7 +28,7 @@ RUN apt-get install -y --fix-missing \
 
 RUN pip install dlib==19.21.1
 
-RUN conda update -n base conda
+# RUN conda update -n base conda
 
 RUN conda install --channel conda-forge --channel defaults \
   _libgcc_mutex=0.1=main \
@@ -111,3 +111,5 @@ RUN pip install \
     pillow==8.1.2
 
 WORKDIR /app
+COPY . .
+CMD [ "python", "scripts/server_inference.py" ]
